@@ -1,5 +1,5 @@
 import { useEffect, useState, useForceUpdate } from 'react';
-import { StyleSheet, View, FlatList, Button, Image, Text, ScrollView, Pressable } from 'react-native';
+import { StyleSheet, View, FlatList, Button, Image, Text} from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import GoalItem from './components/GoalItem';
 import GoalInput from './components/GoalInput';
@@ -7,7 +7,9 @@ import GoalInput from './components/GoalInput';
 export default function App() {
   const [goalModal, setGoalModal] = useState(false);
   const [goals, setGoals] = useState([]);
-  const [actualGoals, addActualGoal] = useState([])
+  const [actualGoals, addActualGoal] = useState([]);
+  const [score, setScore] = useState(0);
+  const [allDone, setAllDone] = useState(false);
 
   function udpateGoals(){
     let tempGoals = [];
@@ -15,9 +17,10 @@ export default function App() {
       if(actualGoals[i] != undefined){
         tempGoals[i] = actualGoals[i];
       } else {
-        tempGoals[i] = {Title: null, id:i};
+        tempGoals[i] = {Title: null, id:i+1};
       }
     }
+    allComplete();
     setGoals(tempGoals);
   }
 
@@ -32,26 +35,58 @@ export default function App() {
     setGoalModal(false);
   }
   function completeGoal(id){
-    let temp = []
     for(let i=0;i<actualGoals.length;i++){
-      temp[i] = actualGoals[i];
       if(actualGoals[i].id == id){
-        if(goals[i].Complete == false){
-          goals[i].Complete = true;
+        if(actualGoals[i].Complete == false){
+          switch(actualGoals[i].Difficulty){
+            case 'Easy':
+              setScore(score + 10);
+              break;
+            case 'Medium':
+              setScore(score + 25);
+              break;
+            case 'Hard':
+              setScore(score + 100);
+              break;
+          }
+          actualGoals[i].Complete = true;
         } else {
-          goals[i].Complete = false;
+          switch(actualGoals[i].Difficulty){
+            case 'Easy':
+              setScore(score - 10);
+              break;
+            case 'Medium':
+              setScore(score - 25);
+              break;
+            case 'Hard':
+              setScore(score - 100);
+              break;
+          }
+          actualGoals[i].Complete = false;
         }
       }
     }
     udpateGoals();
   }
+  function allComplete(){
+    let complete = true
+    if(actualGoals.length > 0){
+      for(let i=0;i<actualGoals.length;i++){
+        if(actualGoals[i].Complete === false){
+          complete = false;
+        }
+      }
+      setAllDone(complete);
+    }
 
-  function addGoalHandler(enteredText) {
-    addActualGoal((currentGoals) => [{Title: enteredText, id:actualGoals.length+1, Complete: false},...currentGoals,]);
+  }
+
+  function addGoalHandler([enteredText,type,level]) {
+    addActualGoal((currentGoals) => [{Title: enteredText, id:actualGoals.length+1, Complete: false, Type: type, Difficulty: level},...currentGoals,]);
     //setGoals((currentGoals) => [{Title: enteredText, id:actualGoals.length+1, Status: 'uncomplete'},...currentGoals,]);
     let tempGoals = [];
     let halfTempGoals = actualGoals
-    halfTempGoals.unshift({Title: enteredText, id:actualGoals.length+1, Complete: false});
+    halfTempGoals.unshift({Title: enteredText, id:actualGoals.length+1, Complete: false, Type: type, Difficulty: level});
     for(let i=0;i<12;i++){
       if(halfTempGoals[i] != undefined){
         tempGoals[i] = halfTempGoals[i];
@@ -61,6 +96,7 @@ export default function App() {
     }
     setGoals(tempGoals);
     cancelGoal();
+    
   }
 function deleteGoal(id){
   //setGoals(goals  => {return goals.filter((goal) => goal.id !== id);});
@@ -80,10 +116,12 @@ function deleteGoal(id){
 
   return (
     <>
+    
     <StatusBar style='light'/>
-    <View style={styles.container}>
+    <View style={[styles.container, allDone == true ? styles.allComplete : styles.notComplete]}>
       <View style={styles.logoContainer}>
       <Image style={styles.image} source={require('./assets/images/logo.png')}/>
+      <Text style={styles.scoreText}>Score: {score}</Text>
 
       </View>
       <View style={styles.addGoalBtn} title='New Goal' color={'gray'} onPress={startAddGoal}>
@@ -100,6 +138,7 @@ function deleteGoal(id){
         />
       </View>
     </View>
+    
     </>
   );
 }
@@ -112,11 +151,23 @@ const styles = StyleSheet.create({
     height: '100%',
     width: '100%',
   },
+  allComplete: {
+    backgroundColor: '#0e1111',
+    //backgroundColor: '#90EE90',
+  },
+  notComplete: {
+    //backgroundColor: '#ffefd5',
+  },
   logoContainer: {
     width: '100%',
     alignItems: 'center',
     borderBottomWidth: 1,
+    //borderBottomColor: 'gray',
     borderBottomColor: '#d4af37',
+    
+  },
+  scoreText: {
+    color: 'grey',
     marginBottom: 20,
   },
   goalsContainer: {

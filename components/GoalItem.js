@@ -1,4 +1,5 @@
 import { StyleSheet, View, Text, Pressable } from 'react-native';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 function GoalItem(props){ 
 
@@ -11,6 +12,14 @@ function GoalItem(props){
         : (
         <View style={props.value.Complete? [styles.goalItem,styles.completeGoal] : styles.goalItem}>
             <Text style={styles.goalText}>{props.value.Title}</Text>
+            {props.value.Type == 'daily' ? (
+              <FontAwesome5 style={styles.goalText} name={'history'} />
+            ) : (
+              <FontAwesome5 style={styles.goalText} name={'bullseye'} />
+            ) 
+            }
+            <Text>{props.value.Difficulty}</Text>
+            
         </View>
         )}
     </Pressable>
@@ -31,15 +40,18 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginRight: 23,
         marginTop: 25,
+        justifyContent: 'space-around'
       },
       goalText: {
-        padding: 10,
+        padding: 0,
+        fontSize: 15,
       },
       emptyGoal: {
         height: 115,
         width: 114,
         borderRadius: 15,
         borderWidth: 1,
+        //borderColor: 'gray',
         borderColor: '#d4af37',
         justifyContent: 'flex-start',
         alignItems: 'center',
@@ -50,6 +62,8 @@ const styles = StyleSheet.create({
         opacity: .3,
       },
       completeGoal: {
-        backgroundColor: '#58cc02'
+        backgroundColor: '#0CCA4A'
+        //backgroundColor: '#00FF7F'
+        //backgroundColor: '#90EE90',
       },
 })
